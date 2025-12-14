@@ -1,0 +1,42 @@
+package org.firstinspires.ftc.teamcode.blackice;
+
+import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.blackice.core.Follower;
+import org.firstinspires.ftc.teamcode.blackice.core.PDController;
+import org.firstinspires.ftc.teamcode.blackice.core.PredictiveBrakingController;
+import org.firstinspires.ftc.teamcode.blackice.drivetrain.DrivetrainConfig;
+import org.firstinspires.ftc.teamcode.blackice.drivetrain.mecanum.MecanumConfig;
+import org.firstinspires.ftc.teamcode.blackice.localizers.LocalizerConfig;
+import org.firstinspires.ftc.teamcode.blackice.localizers.pinpoint.PinpointConfig;
+
+public class FollowerConstants {
+    public static LocalizerConfig localizerConfig = new PinpointConfig()
+        .distanceUnit(DistanceUnit.INCH)
+        .name("odo")
+        .podDirection(
+            GoBildaPinpointDriver.EncoderDirection.FORWARD,
+            GoBildaPinpointDriver.EncoderDirection.FORWARD)
+        .podOffset(84, -168);
+    
+    public static DrivetrainConfig drivetrainConfig = new MecanumConfig()
+        .frontLeft("frontLeft", DcMotorSimple.Direction.REVERSE)
+        .backLeft("backLeft", DcMotorSimple.Direction.FORWARD)
+        .frontRight("frontRight", DcMotorSimple.Direction.REVERSE)
+        .backRight("backRight", DcMotorSimple.Direction.FORWARD)
+        .maxForwardSpeed(60)
+        .maxStrafeSpeed(45);
+
+    public static Follower createFollower(HardwareMap hardwareMap) {
+        return new Follower(
+            new PDController(3, 0.15),
+            new PredictiveBrakingController(0.3, 0.0881, 0.00117),
+            drivetrainConfig,
+            localizerConfig,
+            hardwareMap
+        );
+    }
+}
