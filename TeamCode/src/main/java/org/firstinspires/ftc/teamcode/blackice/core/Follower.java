@@ -27,7 +27,9 @@ public class Follower {
     public final Drivetrain drivetrain;
     public final Localizer localizer;
     
-    double lastDrivePower = 1;
+    public PoseTolerance poseTolerance;
+    public MotionTolerance motionTolerance;
+    
     boolean isBraking = false;
     Vector brakingVector;
     double deltaTime;
@@ -37,19 +39,27 @@ public class Follower {
                     PredictiveBrakingController positionalController,
                     DrivetrainConfig drivetrain,
                     LocalizerConfig localizer,
-                    HardwareMap hardwareMap) {
+                    HardwareMap hardwareMap,
+                    PoseTolerance poseTolerance,
+                    MotionTolerance motionTolerance) {
         this.headingController = headingController;
         this.positionalController = positionalController;
         this.drivetrain = drivetrain.build(hardwareMap);
         this.localizer = localizer.build(hardwareMap);
         this.drivetrain.zeroPowerFloatMode();
+        this.poseTolerance = poseTolerance;
+        this.motionTolerance = motionTolerance;
     }
 
     public void reset() {
         headingController.reset();
         isBraking = false;
-        lastDrivePower = 1;
         brakingVector = null;
+    }
+    
+    public boolean isStoppedAt(Pose pose) {
+        return poseTolerance.atPose(pose, localizer.getPose())
+            && motionTolerance.isStopped(localizer.getVelocity(), localizer.getAngularVelocity());
     }
 
     /**
@@ -59,15 +69,25 @@ public class Follower {
         Vector robotVector = localizer.toRobotRelativeVector(fieldVector);
         drivetrain.followVector(robotVector, turnPower);
     }
-
+    
+    /**
+     * Returns true if the robot is within braking distance of the target pose.
+     */
     public void holdPose(Pose pose) {
         holdPose(pose, 1);
     }
+    
+    /**
+     * Returns true if the robot is within braking distance of the target pose.
+     */
+    public boolean holdPose(Pose pose, double maxPower) {
+        Vector holdPower = computeHoldPower(pose.getPosition());
+        double powerMag = holdPower.computeMagnitude();
+        if (powerMag > maxPower) {
+            holdPower = holdPower.times(maxPower / powerMag);
+        }
 
-    public void holdPose(Pose pose, double maxPower) {
-        Vector holdPower = computeHoldPower(pose.getPosition()).withMaxMagnitude(maxPower);
-
-        if (localizer.getVelocity().computeMagnitude() < 0.1 && holdPower.computeMagnitude() < 0.1) {
+        if (localizer.getVelocity().computeMagnitude() < 0.1 && powerMag < 0.1) {
             holdPower = new Vector(0, 0);
         }
 
@@ -79,6 +99,8 @@ public class Follower {
         }
 
         followFieldVector(holdPower, turnPower);
+        
+        return powerMag < 1;
     }
 
     public Vector computeHoldPower(Vector position) {

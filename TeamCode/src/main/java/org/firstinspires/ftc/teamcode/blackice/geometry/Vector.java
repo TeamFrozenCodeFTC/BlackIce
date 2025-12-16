@@ -100,6 +100,12 @@ public class Vector {
         return Math.atan2(direction.getY(), direction.getX());
     }
     
+    public double distanceTo(Vector point) {
+        double dx = point.getX() - this.getX();
+        double dy = point.getY() - this.getY();
+        return Math.sqrt(dx * dx + dy * dy);
+    }
+    
     @Override
     public String toString() {
         return "Vector(" + x + ", " + y + ")";

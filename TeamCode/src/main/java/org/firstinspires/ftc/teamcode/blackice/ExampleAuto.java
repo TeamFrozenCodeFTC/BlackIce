@@ -24,13 +24,13 @@ public class ExampleAuto extends OpMode {
         switch (state) {
             case 0:
                 follower.holdPose(targetPose);
-                if (follower.localizer.getPose().getPosition().getX() >= 48.5) {
+                if (follower.isStoppedAt(targetPose)) {
                     state++;
                 }
                 break;
             case 1:
                 follower.holdPose(startingPose);
-                if (follower.localizer.getPose().getPosition().getX() <= 0.5) {
+                if (follower.isStoppedAt(startingPose)) {
                     state++;
                 }
                 break;

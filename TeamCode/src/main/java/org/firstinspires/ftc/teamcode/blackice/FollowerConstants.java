@@ -6,7 +6,9 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.blackice.core.Follower;
+import org.firstinspires.ftc.teamcode.blackice.core.MotionTolerance;
 import org.firstinspires.ftc.teamcode.blackice.core.PDController;
+import org.firstinspires.ftc.teamcode.blackice.core.PoseTolerance;
 import org.firstinspires.ftc.teamcode.blackice.core.PredictiveBrakingController;
 import org.firstinspires.ftc.teamcode.blackice.drivetrain.DrivetrainConfig;
 import org.firstinspires.ftc.teamcode.blackice.drivetrain.mecanum.MecanumConfig;
@@ -36,7 +38,9 @@ public class FollowerConstants {
             new PredictiveBrakingController(0.3, 0.0881, 0.00117),
             drivetrainConfig,
             localizerConfig,
-            hardwareMap
+            hardwareMap,
+            new PoseTolerance(0.5, 3),
+            new MotionTolerance(0.25, 5)
         );
     }
 }
